@@ -118,7 +118,7 @@ def seleccionar(catalogo):
 
     definicion = catalogo[lenguaje]
 
-    # TODO: mostrar las tareas de ese lenguaje con elegir_opcion(...).
+    # TODO (HECHO): mostrar las tareas de ese lenguaje con elegir_opcion(...).
     # La lista de tareas esta en definicion["tasks"].
     tarea = elegir_opcion("Tarea:", definicion["tasks"])
 
@@ -249,7 +249,7 @@ def describir_estado(status):
     correctos = status.succeeded or 0
     fallidos = status.failed or 0
 
-    # TODO: devolver un texto que distinga los cuatro casos:
+    # TODO (HECHO): devolver un texto que distinga los cuatro casos:
     #   - `activos` > 0    -> el Job sigue en ejecucion;
     #   - `correctos` > 0  -> el Job termino correctamente;
     #   - `fallidos` > 0   -> el Job fallo;
@@ -263,15 +263,13 @@ def describir_estado(status):
         return "fallido"
     return "pendiente (el Pod aun no arranca)"
 
-    raise NotImplementedError("describir_estado")
-
 
 def listar_jobs():
     """Devuelve [(nombre, estado)] de todos los Jobs del namespace.
 
     Esta es la lista que muestra la opcion 2 del menu.
     """
-    # TODO: pedir todos los Jobs del namespace con
+    # TODO (HECHO): pedir todos los Jobs del namespace con
     #   cliente_batch().list_namespaced_job(namespace=NAMESPACE)
     # El resultado tiene un atributo `.items`; de cada elemento se usan
     # `job.metadata.name` y `job.status`.
@@ -308,7 +306,7 @@ def consultar_logs(nombre):
 
     pod = pods.items[0].metadata.name
 
-    # TODO: devolver la salida del Pod. Pidan la respuesta sin procesar y
+    # TODO (HECHO): devolver la salida del Pod. Pidan la respuesta sin procesar y
     # decodifiquenla:
     #
     #   respuesta = core.read_namespaced_pod_log(
@@ -321,8 +319,6 @@ def consultar_logs(nombre):
     respuesta = core.read_namespaced_pod_log(
         name=pod, namespace=NAMESPACE, _preload_content=False)
     return respuesta.data.decode("utf-8", errors="replace")
-
-    raise NotImplementedError("consultar_logs")
 
 
 # ---------------------------------------------------------------------------
@@ -338,7 +334,7 @@ def jobs_terminados():
     """
     jobs = cliente_batch().list_namespaced_job(namespace=NAMESPACE)
 
-    # TODO: devolver la lista de nombres de los Jobs terminados. De cada `job`
+    # TODO (HECHO): devolver la lista de nombres de los Jobs terminados. De cada `job`
     # se usan `job.metadata.name` y los mismos contadores de `job.status` que
     # ya interpretaron en describir_estado: `active`, `succeeded` y `failed`.
     
@@ -352,12 +348,9 @@ def jobs_terminados():
             terminados.append(job.metadata.name)
     return terminados
 
-    raise NotImplementedError("jobs_terminados")
-
-
 def eliminar_job(nombre):
     """Elimina un Job y, con el, el Pod que creo."""
-    # TODO: borrar el Job con
+    # TODO (HECHO): borrar el Job con
     #   cliente_batch().delete_namespaced_job(
     #       name=nombre,
     #       namespace=NAMESPACE,
@@ -376,8 +369,7 @@ def eliminar_job(nombre):
         body=client.V1DeleteOptions(propagation_policy="Background"),
     )
     
-    
-    raise NotImplementedError("eliminar_job")
+
 
 
 # ---------------------------------------------------------------------------
