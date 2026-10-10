@@ -57,11 +57,35 @@ def matriz(n):
     return {"n": n, "traza": round(sum(c[i][i] for i in range(n)), 6)}
 
 
+def primos(n):
+    # Division de prueba a proposito: sin criba, para saturar una CPU.
+    print(f"Contando primos hasta {n} por division de prueba...")
+    cuenta = 0
+    ultimo = None
+    paso = max(1, n // 10)
+    for k in range(2, n + 1):
+        es_primo = True
+        d = 2
+        while d * d <= k:
+            if k % d == 0:
+                es_primo = False
+                break
+            d += 1
+        if es_primo:
+            cuenta += 1
+            ultimo = k
+        if n >= 100000 and k % paso == 0:
+            print(f"  progreso {k}/{n}")
+    return {"n": n, "cuenta": cuenta, "ultimo": ultimo}
+
+
+
 TAREAS = {
     "hola": hola,
     "ordenar": ordenar,
     "fib": fib,
     "matriz": matriz,
+    "primos": primos,
 }
 
 

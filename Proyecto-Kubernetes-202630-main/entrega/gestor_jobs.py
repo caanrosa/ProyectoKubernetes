@@ -263,6 +263,21 @@ def describir_estado(status):
         return "fallido"
     return "pendiente (el Pod aun no arranca)"
 
+def motivo_fallo(nombre):
+    """Devuelve el motivo de terminacion del contenedor (ej. OOMKilled)."""
+    config.load_kube_config()
+    core = client.CoreV1Api()
+    pods = core.list_namespaced_pod(
+        namespace=NAMESPACE,
+        label_selector=f"job-name={nombre}",
+    )
+    for pod in pods.items:
+        for estado in pod.status.container_statuses or []:
+            terminado = estado.state.terminated if estado.state else None
+            if terminado and terminado.reason:
+                return terminado.reason
+    return None
+
 
 def listar_jobs():
     """Devuelve [(nombre, estado)] de todos los Jobs del namespace.
@@ -275,7 +290,15 @@ def listar_jobs():
     # `job.metadata.name` y `job.status`.
     jobs = cliente_batch().list_namespaced_job(namespace=NAMESPACE)
 
-    return [(job.metadata.name, describir_estado(job.status)) for job in jobs.items]
+    resultado = []
+    for job in jobs.items:
+        estado = describir_estado(job.status)
+        if estado == "fallido":
+            motivo = motivo_fallo(job.metadata.name)
+            if motivo:
+                estado = f"fallido ({motivo})"
+        resultado.append((job.metadata.name, estado))
+    return resultado
 
 
 def consultar_estado(nombre):
@@ -472,8 +495,8 @@ def menu():
             # Errores que devuelve el API server: nombre repetido, namespace
             # inexistente, permisos insuficientes...
             print(f"\nError de Kubernetes ({error.status}): {error.reason}")
-        except Exception as error:  # noqa: BLE001 - el menu no debe caerse
-            print(f"\nError: {error}")
+            if error.body:
+                print(f"  Detalle: {error.body}")
 
 
 if __name__ == "__main__":
