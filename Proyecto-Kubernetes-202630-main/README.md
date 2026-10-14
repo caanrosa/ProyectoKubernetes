@@ -1,5 +1,138 @@
 # Proyecto Kubernetes 202630 — Jobs parametrizados desde línea de comandos
 
+## 1. Descripción
+Este programa es un gestor de tareas para Kubernetes, implementado en Python. Muestra un menú en la consola donde el usuario elige el lenguaje, la tarea y la complejidad, y crea un Job en el clúster. Permite:
+
+- Crear un Job con los argumentos y recursos de la tarea elegida.
+- Revisar el estado de todos los Jobs del namespace estudiantes-202630.
+- Ver los logs de un Job.
+- Limpiar los Jobs que ya terminaron.
+
+El recorrido completo es:
+
+`gestor_jobs.py -> Job de Kubernetes -> Pod -> contenedor con argumentos -> logs`
+
+Video de demostración: (pendiente el link del video)
+
+Integrantes: Carlos Rojas, Sebastian Martinez, Cesar Jarava
+
+## 2. Requisitos
+
+- Windows con PowerShell
+- Docker Desktop
+- Minikube y kubectl
+- Python 3 y la librería kubernetes.
+
+## 3. Preparación
+
+Ejecutar desde la carpeta raíz del proyecto, con Docker Desktop abierto:
+
+```powershell
+minikube start --driver=docker --container-runtime=docker
+kubectl apply -f .\k8s\00-namespace.yaml
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\preparar-imagenes.ps1
+pip install -r .\entrega\requirements.txt
+```
+
+Si se cambia el programa de un contenedor, hay que volver a ejecutar "preparar-imagenes.ps1". 
+
+## 4. Estructura del proyecto
+
+- catalogo/tareas.json: lenguajes, imágenes y tareas disponibles.
+- entrega/gestor_jobs.py: el código del menú.
+- imagenes/: los códigos y Dockerfiles de las imágenes de Python, Java y C.
+- k8s/00-namespace.yaml: el namespace donde se crean los Jobs.
+- scripts/preparar-imagenes.ps1: creación de las imágenes dentro de Minikube.
+
+## 5. Ejecución
+
+1. Abrir Docker Desktop y comprobar que Minikube está activo con "minikube status".
+2. Desde la raíz del proyecto, ejecutar:
+
+```powershell
+python .\entrega\gestor_jobs.py
+```
+
+3. Elegir una opción del menú:
+
+```
+=== Gestor de Jobs - namespace estudiantes-202630 ===
+  1. Ejecutar una tarea nueva
+  2. Revisar el estado de las tareas
+  3. Ver los logs de una tarea
+  4. Limpiar las tareas terminadas
+  5. Salir
+```
+
+- **Opción 1:** pide lenguaje, tarea y complejidad, y crea el Job.
+- **Opción 2:** lista los Jobs con su estado: en ejecucion, completado, fallido o pendiente.
+- **Opción 3:** muestra la salida del contenedor del Job elegido.
+- **Opción 4:** borra los Jobs terminados (completados o fallidos) tras pedir confirmación. No toca los que siguen corriendo.
+
+Para comparar con el clúster:
+
+```powershell
+kubectl get jobs,pods -n estudiantes-202630
+kubectl logs -n estudiantes-202630 job/<nombre-del-job>
+```
+
+## 6. Cómo funciona el gestor
+
+El Job se crea con el cliente de Python. Este es contenido del archivo YAML:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: <nombre>
+  namespace: estudiantes-202630
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: tarea
+          image: <imagen>
+          imagePullPolicy: Never
+          args: [<tarea>, <N>]
+          resources:
+            requests: { cpu: <cpu_request>, memory: <mem_request> }
+            limits:   { cpu: <cpu_limit>,   memory: <mem_limit> }
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Proyecto **grupal**: se trabaja en los grupos que se han venido usando durante el curso y
 se entrega antes de la clase de la semana 12 (ver [Entrega](#entrega)).
 
