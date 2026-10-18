@@ -132,12 +132,14 @@ La complejidad fija los recursos del Job y el tamaño del trabajo (el valor de N
 
 ## 8. Tarea adicional: `primos`
 
-Cuenta cuántos números primos hay hasta N, por división de prueba y sin criba, para saturar la CPU. Está implementada solo en Python. Para agregarla se hizo lo siguiente:
+Cuenta cuántos números primos hay hasta N, por división de prueba y sin criba, para saturar la CPU. Está implementada en los tres lenguajes (Python, Java y C) con el mismo algoritmo, así que se puede comparar el tiempo de la misma tarea entre ellos. Para agregarla se hizo lo siguiente:
 
-1. Se añadió la función `primos` en el programa del contenedor de Python y se registró en `TAREAS`.
-2. Se reconstruyó la imagen con `.\scripts\preparar-imagenes.ps1`.
-3. Se añadió `"primos"` a las tareas de `python` en `catalogo/tareas.json`.
+1. Se añadió la función `primos` en el programa de cada contenedor: `imagenes/python/tareas.py` (registrada en `TAREAS`), `imagenes/java/Tareas.java` (nuevo `case "primos"`) e `imagenes/c/tareas.c` (nuevo bloque `else if`).
+2. Se reconstruyeron las imágenes con `.\scripts\preparar-imagenes.ps1`.
+3. Se añadió `"primos"` a las tareas de `python`, `java` y `c` en `catalogo/tareas.json`.
 4. Se añadió la fila de `primos` en la tabla `TAMANOS` del gestor.
+
+Las tres imágenes terminan con el mismo contrato: una última línea JSON con `n`, `cuenta` y `ultimo` (el mayor primo encontrado).
 
 Resultados esperados (sabemos la cantidad de primos):
 
