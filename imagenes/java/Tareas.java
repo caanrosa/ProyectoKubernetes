@@ -20,7 +20,7 @@ public class Tareas {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Uso: <hola|ordenar|fib|matriz> <N>");
+            System.err.println("Uso: <hola|ordenar|fib|matriz|primos> <N>");
             System.exit(2);
         }
 
@@ -79,6 +79,30 @@ public class Tareas {
                 double traza = 0;
                 for (int i = 0; i < n; i++) traza += c[i][i];
                 extra = String.format("\"n\":%d,\"traza\":%.6f", n, traza);
+            }
+            case "primos" -> {
+                // Division de prueba a proposito: sin criba, para saturar una CPU.
+                System.out.printf("Contando primos hasta %d por division de prueba...%n", n);
+                long cuenta = 0;
+                long ultimo = 0;
+                int paso = Math.max(1, n / 10);
+                for (int k = 2; k <= n; k++) {
+                    boolean esPrimo = true;
+                    for (long d = 2; d * d <= k; d++) {
+                        if (k % d == 0) {
+                            esPrimo = false;
+                            break;
+                        }
+                    }
+                    if (esPrimo) {
+                        cuenta++;
+                        ultimo = k;
+                    }
+                    if (n >= 100000 && k % paso == 0)
+                        System.out.printf("  progreso %d/%d%n", k, n);
+                }
+                extra = String.format("\"n\":%d,\"cuenta\":%d,\"ultimo\":%s", n, cuenta,
+                        cuenta > 0 ? String.valueOf(ultimo) : "null");
             }
             default -> {
                 System.err.println("Tarea desconocida: " + tarea);
