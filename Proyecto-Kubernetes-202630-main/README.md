@@ -102,36 +102,61 @@ spec:
             limits:   { cpu: <cpu_limit>,   memory: <mem_limit> }
 ```
 
+El YAML lo que dice realmente es:
 
+- `image_pull_policy="Never"`: las imágenes son locales y no existen en ningún registro.
+- `restart_policy="Never"` y `backoff_limit=0`: si el Pod falla, no se reintenta y el Job queda como fallido.
+- **Estado:** se calcula con los contadores `active`, `succeeded` y `failed` del Job.
+- **Logs:** pertenecen al Pod, no al Job. El Pod se encuentra con la etiqueta `job-name=<nombre del Job>`.
+- **Limpieza:** se borra con `propagation_policy="Background"`. Sin esa opción, el Job desaparece pero su Pod queda huérfano.
 
+## 7. Complejidad
 
+La complejidad fija los recursos del Job y el tamaño del trabajo (el valor de N):
 
+| Nivel | CPU (request - limit) | Memoria (request - limit) |
+|---|---|---|
+| baja | 100m - 500m | 64Mi - 128Mi |
+| media | 250m - 1000m | 128Mi - 512Mi |
+| alta | 500m - 2000m | 256Mi - 1Gi |
 
+| Tarea | baja | media | alta |
+|---|---|---|---|
+| `hola` | 0 | 0 | 0 |
+| `ordenar` | 100000 | 1000000 | 3000000 |
+| `fib` | 25 | 30 | 35 |
+| `matriz` | 60 | 120 | 250 |
+| `primos` | 20000 | 200000 | 1000000 |
 
+`requests` es lo que Kubernetes reserva y `limits` es el tope. Kubernetes exige que `request` sea menor o igual que `limit`; de lo contrario rechaza el Job con un error 422.
 
+## 8. Tarea adicional: `primos`
 
+Cuenta cuántos números primos hay hasta N, por división de prueba y sin criba, para saturar la CPU. Está implementada solo en Python. Para agregarla se hizo lo siguiente:
 
+1. Se añadió la función `primos` en el programa del contenedor de Python y se registró en `TAREAS`.
+2. Se reconstruyó la imagen con `.\scripts\preparar-imagenes.ps1`.
+3. Se añadió `"primos"` a las tareas de `python` en `catalogo/tareas.json`.
+4. Se añadió la fila de `primos` en la tabla `TAMANOS` del gestor.
 
+Resultados esperados (sabemos la cantidad de primos):
 
+| Complejidad | N | `cuenta` |
+|---|---|---|
+| baja | 20000 | 2262 |
+| media | 200000 | 17984 |
+| alta | 1000000 | 78498 |
 
+## 9. OOMKilled
 
+Si un contenedor supera su límite de memoria, Kubernetes lo mata con `OOMKilled`. Usualmente, no sucedía, por lo que una manera de causarlo es bajar temporalmente la complejidad `alta` a `32Mi` - `64Mi` y se ejecutó `python / ordenar / alta`. El gestor lee el motivo de terminación del contenedor y lo muestra:
 
+```
+Tareas en estudiantes-202630:
+  - python-ordenar-alta-1791659060: fallido (OOMKilled)
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Se confirmó con `kubectl describe pod -n estudiantes-202630`, que muestra `Reason: OOMKilled`. Después se restauró el nivel `alta` a `256Mi` - `1Gi`. Pero es solo una manera de provocarlo, y comprobar que sí funciona.
 
 Proyecto **grupal**: se trabaja en los grupos que se han venido usando durante el curso y
 se entrega antes de la clase de la semana 12 (ver [Entrega](#entrega)).
