@@ -12,7 +12,7 @@ El recorrido completo es:
 
 `gestor_jobs.py -> Job de Kubernetes -> Pod -> contenedor con argumentos -> logs`
 
-Video de demostración: (pendiente el link del video)
+Video de demostración: (https://youtu.be/TBByySZfj20)
 
 Integrantes: Carlos Rojas, Sebastián Mercado, Cesar Jarava
 
