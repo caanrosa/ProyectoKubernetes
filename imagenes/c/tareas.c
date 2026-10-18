@@ -28,7 +28,7 @@ static long long fib_rec(int k) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Uso: <hola|ordenar|fib|matriz> <N>\n");
+        fprintf(stderr, "Uso: <hola|ordenar|fib|matriz|primos> <N>\n");
         return 2;
     }
 
@@ -88,6 +88,24 @@ int main(int argc, char *argv[]) {
         for (long i = 0; i < n; i++) traza += c[i * n + i];
         snprintf(extra, sizeof(extra), "\"n\":%ld,\"traza\":%.6f", n, traza);
         free(a); free(b); free(c);
+
+    } else if (strcmp(tarea, "primos") == 0) {
+        /* Division de prueba a proposito: sin criba, para saturar una CPU. */
+        printf("Contando primos hasta %ld por division de prueba...\n", n);
+        long cuenta = 0, ultimo = 0;
+        long paso = n / 10 > 0 ? n / 10 : 1;
+        for (long k = 2; k <= n; k++) {
+            int es_primo = 1;
+            for (long d = 2; d * d <= k; d++) {
+                if (k % d == 0) { es_primo = 0; break; }
+            }
+            if (es_primo) { cuenta++; ultimo = k; }
+            if (n >= 100000 && k % paso == 0) printf("  progreso %ld/%ld\n", k, n);
+        }
+        if (cuenta > 0)
+            snprintf(extra, sizeof(extra), "\"n\":%ld,\"cuenta\":%ld,\"ultimo\":%ld", n, cuenta, ultimo);
+        else
+            snprintf(extra, sizeof(extra), "\"n\":%ld,\"cuenta\":%ld,\"ultimo\":null", n, cuenta);
 
     } else {
         fprintf(stderr, "Tarea desconocida: %s\n", tarea);
